@@ -5,6 +5,15 @@ import { JWT_SECRET } from "../config/config.js";
 import ApiError from "../utils/apiError.js";
 import jwt from "jsonwebtoken";
 
+const generateToken = (res, userId) => {
+  const token = jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: "7d" });
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+};
+
 export const signup = async (req, res) => {
   try {
     const { username, email, password, confirmPassword } = userSchema.parse(
@@ -23,10 +32,10 @@ export const signup = async (req, res) => {
     });
 
     // create the token
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+    // const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+    generateToken(res, user._id);
 
-    // send the user as response
-    return res.status(201).json({ user, token });
+    res.status(201).json({ user });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors });
@@ -49,10 +58,10 @@ export const signin = async (req, res) => {
     if (!isMatch) throw new ApiError(400, "Invalid credentials");
 
     // create the token
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+    generateToken(res, user._id);
 
     // send the user as response
-    return res.status(200).json({ user, token });
+    return res.status(200).json({ user });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors });
