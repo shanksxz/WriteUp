@@ -1,0 +1,3 @@
+{"level":"info","message":"POST /api/v1/signup","service":"user-service"}
+{"level":"info","message":"POST /api/v1/signup","service":"user-service"}
+{"level":"info","message":"GET /api/v1/post","service":"user-service"}

@@ -1,18 +1,19 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const likeSchema = new mongoose.Schema({
-    post: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Post',
-    },
-    author : {
-        type : mongoose.Schema.Types.ObjectId,
-        ref : 'User'
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
+  post: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Post",
+  },
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.model('Like', likeSchema);
+export default mongoose.model("Like", likeSchema);
+

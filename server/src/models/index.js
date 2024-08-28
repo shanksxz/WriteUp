@@ -1,15 +1,9 @@
-const User = require('./user');
-const Post = require('./post');
-const Comment = require('./comment');
-const Likes = require('./likes');
-const Category = require('./category');
-const Profile = require('./profile');
+import User from "./user.js";
+import Post from "./post.js";
+import Comment from "./comment.js";
+import Likes from "./likes.js";
+import Category from "./category.js";
+import Profile from "./profile.js";
 
-module.exports = {
-    User,
-    Post,
-    Comment,
-    Likes,
-    Category,
-    Profile,
-}
+export { User, Post, Comment, Likes, Category, Profile };
+

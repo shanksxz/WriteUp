@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
-const { DATABASE_URL } = require('./config');
+import mongoose from "mongoose";
+import { DATABASE_URL } from "./config.js";
 
-exports.dbconnect = async () => {
-    try {
-        await mongoose.connect(DATABASE_URL);
-        console.log('Database connected successfully');
-    } catch (error) {
-        console.log("Database connection failed");
-    }
+export const dbconnect = async () => {
+  try {
+    await mongoose.connect(DATABASE_URL);
+    console.log("Database connected successfully");
+  } catch (error) {
+    console.log("Database connection failed");
+  }
 };
