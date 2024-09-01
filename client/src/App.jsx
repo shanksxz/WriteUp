@@ -1,22 +1,12 @@
 import Navbar from "./components/Navbar";
 import { Toaster } from "sonner";
-import { useAuth } from "./store/useAuthStore";
+import { useAuth } from "./context/useAuth";
 
 export default function App() {
 
-  // const {
-  //   isAuthenticated: isAuth,
-  // } = useAuth();
-  //
-  // if(!isAuth) {
-  //   return (
-  //     <h1>Not authenticated</h1>
-  //   );
-  // }
-  
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
 
-  if(!isAuthenticated) {
+  if(!user) {
     return (
       <h1>Not authenticated</h1>
     );

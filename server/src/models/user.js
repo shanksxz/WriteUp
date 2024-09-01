@@ -42,4 +42,3 @@ userSchema.pre("save", async (next) => {
 });
 
 export default mongoose.model("User", userSchema);
-

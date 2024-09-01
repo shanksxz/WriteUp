@@ -5,8 +5,10 @@ import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Login from './components/Login.jsx'
 import Signup from './components/Signup.jsx'
-import Post from './pages/Post.jsx'
+import Posts from './pages/Posts.jsx'
 import { AuthProvider } from './context/useAuth.jsx'
+import MyPosts from './pages/MyPosts.jsx'
+import PostId from './pages/PostId.jsx'
 
 const router = createBrowserRouter([
   {
@@ -23,7 +25,19 @@ const router = createBrowserRouter([
   },
   {
     path : "/create/post",
-    element : <Post />
+    element : <Posts />
+  },
+  {
+    path : "/user/post",
+    element : <MyPosts />
+  },
+  {
+    path : "/post/:id",
+    element : <PostId />
+  },
+  {
+    path : "*",
+    element : <h1>Not found</h1>
   }
 ])
 

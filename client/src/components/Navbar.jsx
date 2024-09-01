@@ -2,15 +2,13 @@ import React from 'react';
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/store/useAuthStore";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from '@/context/useAuth';
+import DropDownMenu from './DropDownMenu';
 
 export default function Navbar() {
   const navigate = useNavigate();
 
-  const { isAuthenticated, user } = useAuth();
-  // console.log(isAuthenticated, user);
+  const { user } = useAuth();
 
   console.log(user);
 
@@ -42,7 +40,7 @@ export default function Navbar() {
           >
             Blog
           </span>
-          {!isAuthenticated ? (
+          {!user? (
             <Button
               className="h-8 rounded-full"
               onClick={() => navigate("/auth/login")}
@@ -50,11 +48,12 @@ export default function Navbar() {
               Sign In
             </Button>
           ) : (
-            <Avatar className="h-7 w-7">
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {user?.user?.firstName?.split("")[0]}
-              </AvatarFallback>
-            </Avatar>
+            <DropDownMenu user={user} />
+            // <Avatar className="h-7 w-7">
+            //   <AvatarFallback className="bg-primary text-primary-foreground">
+            //     {user?.user?.firstName?.split("")[0]}
+            //   </AvatarFallback>
+            // </Avatar>
           )}
         </nav>
         <Sheet>

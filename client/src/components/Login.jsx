@@ -16,6 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
+import { useEffect } from 'react';
+import { useAuth } from '@/context/useAuth';
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -32,6 +34,13 @@ export default function Login() {
   });
 
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if(user) {
+      navigate('/');
+    }
+  }, []);
 
   const onSubmit = async (data) => {
     console.log(data);

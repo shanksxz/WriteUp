@@ -105,8 +105,21 @@ export const getPosts = async (req, res) => {
   }
 };
 
+export const getUserPosts = async (req, res) => {
+  try {
+    const posts = await Post.find({ author: req.user.id }).populate(
+      "author",
+      "username",
+    );
+    res.status(200).json({ posts });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const getPost = async (req, res) => {
   try {
+    console.log("inside getPost", req.params.id)
     const post = await Post.findById(req.params.id).populate(
       "author",
       "username",

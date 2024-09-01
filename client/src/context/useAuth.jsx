@@ -7,38 +7,38 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const foo = async () => {
+  const fetchUser = async () => {
     try {
-      setLoading(true);
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/me`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/auth/me`, {
         withCredentials: true,
       });
 
       if (res.data) {
-        setUser(res.data);
-        setIsAuthenticated(true);
-        setLoading(false);
+        setUser(res.data.user);
       }
-    } catch (error) {
-      setError(error);
-      console.log(error);
+    } catch (err) {
+      setError(err);
+      console.error(err);
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    foo();
+    fetchUser();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, isAuthenticated }}>
-      {children}
+    <AuthContext.Provider value={{ user, loading, error, isAuthenticated: !!user }}>
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }
-
 
 export function useAuth() {
   const context = useContext(AuthContext);
