@@ -17,6 +17,7 @@ app.use(
     cors({
         origin: "http://localhost:5173",
         methods: "GET,POST,PUT,DELETE",
+        credentials: true,
     }),
 );
 
@@ -33,8 +34,8 @@ app.get("/", (req, res) => {
     res.send("Hello World");
 });
 
-app.use("/api/v1", userRoutes);
-app.use("/api/v1", postRoutes);
+app.use("/api", userRoutes);
+app.use("/api", postRoutes);
 
 app.use((req, res, next) => {
     next(new ApiError(404, `Can't find ${req.originalUrl} on this server!`));
