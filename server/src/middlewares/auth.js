@@ -4,8 +4,8 @@ import jwt from "jsonwebtoken";
 
 export const auth = async (req, res, next) => {
   try {
-    const token =
-      req.cookies.token || req.body.token || req.headers["Authorization"].replace("Bearer ", "");
+    const token = req.cookies.token;
+    console.log("Auth middleware", token)
     if (!token) throw new ApiError(401, "Unauthorized");
 
     // verify the token
@@ -19,4 +19,3 @@ export const auth = async (req, res, next) => {
     return res.status(500).json({ error: error.message });
   }
 };
-
