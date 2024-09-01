@@ -1,7 +1,31 @@
+import Navbar from "./components/Navbar";
+import { Toaster } from "sonner";
+import { useAuth } from "./store/useAuthStore";
+
 export default function App() {
+
+  // const {
+  //   isAuthenticated: isAuth,
+  // } = useAuth();
+  //
+  // if(!isAuth) {
+  //   return (
+  //     <h1>Not authenticated</h1>
+  //   );
+  // }
+  
+  const { isAuthenticated } = useAuth();
+
+  if(!isAuthenticated) {
+    return (
+      <h1>Not authenticated</h1>
+    );
+  }
+  
   return (
-    <div className="bg-gray-200 h-screen flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-gray-800">Hello, Tailwind CSS!</h1>
+    <div className="mx-auto max-w-4xl">
+      <Navbar />
+      <Toaster />
     </div>
   );
 }
