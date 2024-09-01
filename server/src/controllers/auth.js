@@ -4,6 +4,7 @@ import { userSchema } from "../validators/index.js";
 import { JWT_SECRET } from "../config/config.js";
 import ApiError from "../utils/apiError.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const generateToken = (res, userId) => {
   const token = jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: "7d" });
@@ -16,19 +17,28 @@ const generateToken = (res, userId) => {
 
 export const signup = async (req, res) => {
   try {
-    const { username, email, password, confirmPassword } = userSchema.parse(
+    console.log(req.body);
+    const { firstName, lastName, username, email, password } = userSchema.parse(
       req.body,
     );
 
-    // validate the password
-    if (password !== confirmPassword)
-      throw new ApiError(400, "Passwords do not match");
+    // check if the user already exists
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new ApiError(400, "User already exists");
+    }
+
+    // hash the password
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     // create the user
     const user = await User.create({
+      firstName,
+      lastName,
       username,
       email,
-      password,
+      password : hashedPassword
     });
 
     // create the token
@@ -44,17 +54,24 @@ export const signup = async (req, res) => {
   }
 };
 
+const signInSchema = z.object({
+  email: z.string().email(),
+  password: z.string(),
+});
+
 export const signin = async (req, res) => {
   try {
-    const { email, password } = userSchema
-      .pick(["email", "password"])
-      .parse(req.body);
+
+    console.log(req.body);
+    const { email, password } = signInSchema.parse(req.body);
+
+    console.log(email, password);
 
     const user = await User.findOne({ email });
     if (!user) throw new ApiError(404, "User not found");
 
     // compare the password
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new ApiError(400, "Invalid credentials");
 
     // create the token
@@ -68,4 +85,22 @@ export const signin = async (req, res) => {
     }
     return res.status(500).json({ error: error.message });
   }
+};
+
+export const checkAuth = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if(!user) {
+      res.status(404).json({message: "User not found"});
+    }
+
+    res.status(200).json({user});
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+};
+
+export const signout = (req, res) => {
+    res.clearCookie("token");
+    res.status(200).json({ message: "Signout successful" });
 };
