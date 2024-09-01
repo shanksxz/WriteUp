@@ -38,7 +38,7 @@ const postSchema = z.object({
     ),
 });
 
-export default function Post() {
+export default function Posts() {
   const [previewUrl, setPreviewUrl] = useState(null);
   const {
     register,
@@ -76,7 +76,6 @@ export default function Post() {
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            "X-XSRF-TOKEN": "your-csrf-token-here",
           },
           withCredentials: true,
         },
