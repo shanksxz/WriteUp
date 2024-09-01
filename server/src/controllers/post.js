@@ -1,24 +1,96 @@
 import { z } from "zod";
 import { Post } from "../models/index.js";
-import { postSchema } from "../validators/index.js";
+// import { postSchema } from "../validators/index.js";
+import { uploadOnCloudinary, deleteFromCloudinary } from "../config/cloudinary.js";
 
 export const createPost = async (req, res) => {
   try {
-    // validate the req body
-    const { title, content, image } = postSchema.parse(req.body);
-
-    // get the user id from the req.user object
+    console.log("req files", req.files);
+    console.log("req body", req.body);
+    // const { title, content } = postSchema.parse(req.body);
+    const { title, content } = req.body;
     const author = req.user.id;
 
-    // create the post
-    const post = await Post.create({ title, content, image, author });
 
-    // send the post as response
+    let imageUrl = null;
+    let publicId = null;
+    if (req.files && req.files.image && req.files.image[0]) {
+      const result = await uploadOnCloudinary(req.files.image[0].path);
+      if (result) {
+        imageUrl = result.url;
+        publicId = result.public_id;
+      }
+    }
+
+    const post = await Post.create({ 
+      title, 
+      content, 
+      image: imageUrl,
+      imagePublicId: publicId,
+      author 
+    });
+
     res.status(201).json({ post });
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: error.message });
     }
+  }
+};
+
+export const updatePost = async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    
+    let updateData = { title, content };
+
+    const existingPost = await Post.findById(req.params.id);
+    if (!existingPost) return res.status(404).json({ error: "Post not found" });
+
+    if (req.files && req.files.image && req.files.image[0]) {
+      //TODO: delete old image if it exists
+      // if (existingPost.imagePublicId) {
+      //   await deleteFromCloudinary(existingPost.imagePublicId);
+      // }
+
+      const result = await uploadOnCloudinary(req.files.image[0].path);
+      if (result) {
+        updateData.image = result.url;
+        updateData.imagePublicId = result.public_id;
+      }
+    }
+
+    const post = await Post.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true },
+    );
+
+    res.status(200).json({ post });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+};
+
+export const deletePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: "Post not found" });
+
+    //TODO: delete the image from Cloudinary if it exists
+    // if (post.imagePublicId) {
+    //   await deleteFromCloudinary(post.imagePublicId);
+    // }
+
+    await Post.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -43,39 +115,6 @@ export const getPost = async (req, res) => {
     if (!post) return res.status(404).json({ error: "Post not found" });
 
     res.status(200).json({ post });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export const updatePost = async (req, res) => {
-  try {
-    const { title, content, image } = postSchema.parse(req.body);
-
-    const post = await Post.findByIdAndUpdate(
-      req.params.id,
-      { title, content, image },
-      { new: true },
-    );
-
-    if (!post) return res.status(404).json({ error: "Post not found" });
-
-    res.status(200).json({ post });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ error: error.message });
-    }
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export const deletePost = async (req, res) => {
-  try {
-    const post = await Post.findByIdAndDelete(req.params.id);
-
-    if (!post) return res.status(404).json({ error: "Post not found" });
-
-    res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
