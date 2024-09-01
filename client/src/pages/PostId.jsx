@@ -86,7 +86,7 @@ export default function PostId() {
               <span className="font-medium">{post.author.username}</span>
               <span>•</span>
               <time dateTime={new Date(post.createdAt).toLocaleString()} className="text-gray-500">
-                {new Date(post.createdAt).toLocaleDateString()}
+                {new Date(post.createdAt).toDateString()}
               </time>
             </div>
             <div

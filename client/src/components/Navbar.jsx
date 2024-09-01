@@ -1,16 +1,16 @@
-import React from 'react';
+import React from "react";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from '@/context/useAuth';
-import DropDownMenu from './DropDownMenu';
+import { useAuth } from "@/context/useAuth";
+import DropDownMenu from "./DropDownMenu";
+import { Link } from "react-router-dom";
+import ModeToggle from "./ToggleMode";
 
 export default function Navbar() {
   const navigate = useNavigate();
 
   const { user } = useAuth();
-
-  console.log(user);
 
   return (
     <header className="top-0 z-50 w-full bg-background">
@@ -19,28 +19,13 @@ export default function Navbar() {
           className="flex items-center gap-2 font-semibold"
           prefetch={false}
         >
-          <span className="text-lg">WriteUp</span>
+          <Link to={"/"} className="text-2xl">
+            WriteUp
+          </Link>
         </span>
-        <nav className="hidden space-x-4 md:flex md:justify-center md:items-center">
-          <span
-            className="text-sm font-medium transition-colors hover:text-primary"
-            prefetch={false}
-          >
-            Home
-          </span>
-          <span
-            className="text-sm font-medium transition-colors hover:text-primary"
-            prefetch={false}
-          >
-            About
-          </span>
-          <span
-            className="text-sm font-medium transition-colors hover:text-primary"
-            prefetch={false}
-          >
-            Blog
-          </span>
-          {!user? (
+        <nav className="hidden space-x-2 md:flex md:justify-center md:items-center">
+          <ModeToggle />
+          {!user ? (
             <Button
               className="h-8 rounded-full"
               onClick={() => navigate("/auth/login")}
@@ -48,13 +33,8 @@ export default function Navbar() {
               Sign In
             </Button>
           ) : (
-            <DropDownMenu user={user} />
-            // <Avatar className="h-7 w-7">
-            //   <AvatarFallback className="bg-primary text-primary-foreground">
-            //     {user?.user?.firstName?.split("")[0]}
-            //   </AvatarFallback>
-            // </Avatar>
-          )}
+              <DropDownMenu user={user} />
+            )}
         </nav>
         <Sheet>
           <SheetTrigger asChild>
@@ -65,30 +45,30 @@ export default function Navbar() {
           </SheetTrigger>
           <SheetContent side="right" className="w-full max-w-xs">
             <div className="grid gap-4 p-4">
-              <span
+              <Link
                 className="text-sm font-medium transition-colors hover:text-primary"
                 prefetch={false}
               >
                 Home
-              </span>
-              <span
+              </Link>
+              <Link
                 className="text-sm font-medium transition-colors hover:text-primary"
                 prefetch={false}
               >
                 About
-              </span>
-              <span
+              </Link>
+              <Link
                 className="text-sm font-medium transition-colors hover:text-primary"
                 prefetch={false}
               >
                 Blog
-              </span>
-              <span
+              </Link>
+              <Link
                 className="text-sm font-medium transition-colors hover:text-primary"
                 prefetch={false}
               >
                 Contact
-              </span>
+              </Link>
             </div>
           </SheetContent>
         </Sheet>

@@ -1,6 +1,7 @@
 import Navbar from "./components/Navbar";
 import { Toaster } from "sonner";
 import { useAuth } from "./context/useAuth";
+import Home from "./pages/Home";
 
 export default function App() {
 
@@ -13,9 +14,10 @@ export default function App() {
   }
   
   return (
-    <div className="mx-auto max-w-4xl">
-      <Navbar />
-      <Toaster />
-    </div>
+    // <div className="mx-auto max-w-4xl">
+    //   <Navbar />
+    //   <Toaster />
+    // </div>
+    <Home />
   );
 }

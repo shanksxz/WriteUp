@@ -1,11 +1,10 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -14,8 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import axios from "axios";
-import { useEffect } from "react";
 import Layout from "@/components/Layout";
+import Tiptap from "@/components/TipTap";
 
 const postSchema = z.object({
   title: z
@@ -64,11 +63,13 @@ export default function Posts() {
   }, [watchImage]);
 
   const onSubmit = async (data) => {
+    console.log(data);
     const formData = new FormData();
     formData.append("title", data.title);
-    formData.append("content", data.content);
+    formData.append("content", data.content); // Tiptap content
     formData.append("category", data.category);
     formData.append("image", data.image);
+
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/post/create`,
@@ -98,17 +99,22 @@ export default function Posts() {
               {...register("title")}
               placeholder="Enter post title"
             />
-            {errors.title}
+            {errors.title && (
+              <p className="text-red-500">{errors.title.message}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="content">Content</Label>
-            <Textarea
-              id="content"
-              {...register("content")}
-              placeholder="Write your blog post content here"
-              className="h-40"
+            <Controller
+              name="content"
+              control={control}
+              render={({ field }) => (
+                <Tiptap content={field.value} onChange={field.onChange} />
+              )}
             />
-            {errors.content}
+            {errors.content && (
+              <p className="text-red-500">{errors.content.message}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="category">Category</Label>
@@ -132,7 +138,9 @@ export default function Posts() {
                 </Select>
               )}
             />
-            {errors.category}
+            {errors.category && (
+              <p className="text-red-500">{errors.category.message}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="image">Cover Image</Label>
@@ -142,7 +150,9 @@ export default function Posts() {
               accept="image/*"
               {...register("image")}
             />
-            {errors.image}
+            {errors.image && (
+              <p className="text-red-500">{errors.image.message}</p>
+            )}
             {previewUrl && (
               <img
                 src={previewUrl}

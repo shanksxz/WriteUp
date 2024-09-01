@@ -35,7 +35,7 @@ export default function DropDownMenu({ user }) {
           Explore
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate("/post/create")}>
+        <DropdownMenuItem onClick={() => navigate("/create/post")}>
           Create Post
         </DropdownMenuItem>
         <DropdownMenuSeparator />
