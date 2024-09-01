@@ -8,11 +8,25 @@ import {
   deletePost,
 } from "../controllers/post.js";
 import { auth } from "../middlewares/auth.js";
+import { upload } from "../middlewares/multer.js";
 
-router.post("/post/create", auth, createPost);
+router.post(
+  "/post/create",
+  auth,
+  upload.fields([{ name: "image", maxCount: 1 }]),
+  createPost,
+);
+
 router.get("/post", getPosts);
 router.get("/post/:id", auth, getPost);
-router.put("/post/:id", auth, updatePost);
+
+router.put(
+  "/post/:id",
+  auth,
+  upload.fields([{ name: "image", maxCount: 1 }]),
+  updatePost,
+);
+
 router.delete("/post/:id", auth, deletePost);
 
 export default router;
