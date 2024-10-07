@@ -1,16 +1,11 @@
 import { z } from "zod";
 import { Post } from "../models/index.js";
-// import { postSchema } from "../validators/index.js";
-import { uploadOnCloudinary, deleteFromCloudinary } from "../config/cloudinary.js";
+import { uploadOnCloudinary } from "../config/cloudinary.js";
 
 export const createPost = async (req, res) => {
   try {
-    console.log("req files", req.files);
-    console.log("req body", req.body);
-    // const { title, content } = postSchema.parse(req.body);
     const { title, content } = req.body;
     const author = req.user.id;
-
 
     let imageUrl = null;
     let publicId = null;
@@ -50,11 +45,6 @@ export const updatePost = async (req, res) => {
     if (!existingPost) return res.status(404).json({ error: "Post not found" });
 
     if (req.files && req.files.image && req.files.image[0]) {
-      //TODO: delete old image if it exists
-      // if (existingPost.imagePublicId) {
-      //   await deleteFromCloudinary(existingPost.imagePublicId);
-      // }
-
       const result = await uploadOnCloudinary(req.files.image[0].path);
       if (result) {
         updateData.image = result.url;
@@ -82,11 +72,6 @@ export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ error: "Post not found" });
-
-    //TODO: delete the image from Cloudinary if it exists
-    // if (post.imagePublicId) {
-    //   await deleteFromCloudinary(post.imagePublicId);
-    // }
 
     await Post.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Post deleted successfully" });
@@ -120,10 +105,7 @@ export const getUserPosts = async (req, res) => {
 export const getPost = async (req, res) => {
   try {
     console.log("inside getPost", req.params.id)
-    const post = await Post.findById(req.params.id).populate(
-      "author",
-      "username",
-    );
+    const post = await Post.findById(req.params.id).populate("author","username");
 
     if (!post) return res.status(404).json({ error: "Post not found" });
 

@@ -17,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-console.log(import.meta.env.VITE_API_URL);
 
 const signupSchema = z.object({
   firstName: z.string().min(1, "First name is required"),

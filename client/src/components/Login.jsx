@@ -33,8 +33,9 @@ export default function Login() {
     resolver: zodResolver(loginSchema),
   });
 
+
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
 
   useEffect(() => {
     if(user) {
@@ -45,17 +46,16 @@ export default function Login() {
   const onSubmit = async (data) => {
     console.log(data);
     try {
-      console.log("Submitting login data");
       console.log(import.meta.env.VITE_API_URL);
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/signin`, data);
-      console.log(res);
-      // You might want to handle successful login here, e.g., storing tokens, navigating to dashboard, etc.
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/signin`, data, {
+        withCredentials: true,
+      });
+      setUser(res.data.user)
       toast.success("Login successful, redirecting.....");
       await new Promise((resolve) => setTimeout(resolve, 2000));
       navigate("/")
     } catch (error) {
       console.log(error);
-      // You might want to show an error message to the user here
     }
   };
 

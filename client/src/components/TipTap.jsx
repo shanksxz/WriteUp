@@ -1,17 +1,13 @@
-import {
-  useEditor,
-  EditorContent,
-} from "@tiptap/react";
+import React, { useEffect } from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Toolbar from "./ToolBar";
 
 const Tiptap = ({ onChange, content }) => {
-  const handleChange = (newContent) => {
-    onChange(newContent);
-  };
   const editor = useEditor({
     extensions: [StarterKit, Underline],
+    content: content, 
     editorProps: {
       attributes: {
         class:
@@ -19,9 +15,15 @@ const Tiptap = ({ onChange, content }) => {
       },
     },
     onUpdate: ({ editor }) => {
-      handleChange(editor.getHTML());
+      onChange(editor.getHTML());
     },
   });
+
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
 
   return (
     <div className="w-full">

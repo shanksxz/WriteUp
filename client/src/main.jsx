@@ -10,6 +10,7 @@ import { AuthProvider } from "./context/useAuth.jsx";
 import MyPosts from "./pages/MyPosts.jsx";
 import PostId from "./pages/PostId.jsx";
 import { ThemeProvider } from "./context/useTheme.jsx";
+import Profile from "./pages/Profile.jsx";
 
 const router = createBrowserRouter([
   {
@@ -37,9 +38,14 @@ const router = createBrowserRouter([
     element: <PostId />,
   },
   {
+    path : "/profile",
+    element: <Profile />
+  },
+  {
     path: "*",
     element: <h1>Not found</h1>,
   },
+  
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(

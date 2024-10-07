@@ -15,6 +15,8 @@ import {
 import axios from "axios";
 import Layout from "@/components/Layout";
 import Tiptap from "@/components/TipTap";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const postSchema = z.object({
   title: z
@@ -39,6 +41,7 @@ const postSchema = z.object({
 
 export default function Posts() {
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -50,6 +53,7 @@ export default function Posts() {
   });
 
   const watchImage = watch("image");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (watchImage && watchImage.length > 0) {
@@ -66,10 +70,10 @@ export default function Posts() {
     console.log(data);
     const formData = new FormData();
     formData.append("title", data.title);
-    formData.append("content", data.content); // Tiptap content
+    formData.append("content", data.content); 
     formData.append("category", data.category);
     formData.append("image", data.image);
-
+    setSubmitting(true);
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/post/create`,
@@ -81,8 +85,12 @@ export default function Posts() {
           withCredentials: true,
         },
       );
+      toast.success("Post created successfully, redirecting.....");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      navigate("/");
       console.log(res);
     } catch (error) {
+      toast.error("Error creating post");
       console.error("Error during post creation:", error.response.data);
     }
   };
@@ -161,7 +169,9 @@ export default function Posts() {
               />
             )}
           </div>
-          <Button type="submit" className="w-full">
+          <Button type="submit"
+            disabled={submitting}
+            className="w-full">
             Publish Post
           </Button>
         </form>

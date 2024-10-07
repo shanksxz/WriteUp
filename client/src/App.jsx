@@ -1,23 +1,21 @@
-import Navbar from "./components/Navbar";
 import { Toaster } from "sonner";
 import { useAuth } from "./context/useAuth";
 import Home from "./pages/Home";
+import { useNavigate } from "react-router-dom";
 
 export default function App() {
 
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   if(!user) {
-    return (
-      <h1>Not authenticated</h1>
-    );
+    navigate("/auth/login");
   }
   
   return (
-    // <div className="mx-auto max-w-4xl">
-    //   <Navbar />
-    //   <Toaster />
-    // </div>
-    <Home />
+    <>
+      <Home />
+      <Toaster />
+    </>
   );
 }
