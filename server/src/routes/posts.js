@@ -13,7 +13,7 @@ import { upload } from "../middlewares/multer.js";
 router.post(
   "/post/create",
   auth,
-  upload.fields([{ name: "image", maxCount: 1 }]),
+  upload.single("image"),
   createPost,
 );
 
@@ -23,7 +23,7 @@ router.get("/post/:id", auth, getPost);
 router.put(
   "/post/:id",
   auth,
-  upload.fields([{ name: "image", maxCount: 1 }]),
+  upload.single("image"),
   updatePost,
 );
 
