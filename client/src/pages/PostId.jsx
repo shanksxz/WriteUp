@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import LoadingSpinner from "@/components/Loading";
 
 export default function PostId() {
   const { id } = useParams(); 
@@ -36,7 +37,13 @@ export default function PostId() {
   }, [id]);
 
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex h-screen justify-center items-center">
+        <LoadingSpinner />
+      </div>
+    );
+  };
   if (error) return <div>Error: {error}</div>;
 
   return (

@@ -21,9 +21,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import Tiptap from "@/components/TipTap";
 import { useForm } from "react-hook-form";
+import LoadingSpinner from "@/components/Loading";
 
 function stripHtmlAndTruncate(content, length = 100) {
   const plainText = content.replace(/<\/?[^>]+(>|$)/g, "");
@@ -39,6 +40,10 @@ export default function Component() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
   const [postToEdit, setPostToEdit] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
@@ -47,23 +52,36 @@ export default function Component() {
     },
   });
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/user/posts`,
-          {
-            withCredentials: true,
-          },
-        );
-        setPosts(res.data.posts);
-      } catch (error) {
-        console.error("Error fetching posts:", error.response);
-      }
-    };
+  const fetchPosts = async (page) => {
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/user/posts`,
+        {
+          params: { page, limit: 5, search: searchTerm },
+          withCredentials: true,
+        }
+      );
+      setPosts(res.data.posts);
+      setCurrentPage(res.data.currentPage);
+      setTotalPages(res.data.totalPages);
+    } catch (error) {
+      console.error("Error fetching posts:", error.response);
+      toast.error("Failed to fetch posts");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchPosts();
+  useEffect(() => {
+    fetchPosts(1);
   }, []);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      fetchPosts(newPage);
+    }
+  };
 
   const openDeleteDialog = (postId) => {
     setPostToDelete(postId);
@@ -85,10 +103,10 @@ export default function Component() {
         `${import.meta.env.VITE_API_URL}/post/${postToDelete}`,
         {
           withCredentials: true,
-        },
+        }
       );
       toast.success("Post deleted successfully");
-      setPosts(posts.filter((post) => post._id !== postToDelete));
+      fetchPosts(currentPage);
       setIsDeleteDialogOpen(false);
       setPostToDelete(null);
     } catch (error) {
@@ -109,16 +127,10 @@ export default function Component() {
         },
         {
           withCredentials: true,
-        },
+        }
       );
       toast.success("Post updated successfully");
-      setPosts(
-        posts.map((post) =>
-          post._id === postToEdit._id
-            ? { ...post, title: data.title, content: data.content }
-            : post,
-        ),
-      );
+      fetchPosts(currentPage);
       setIsEditDialogOpen(false);
       setPostToEdit(null);
     } catch (error) {
@@ -126,6 +138,14 @@ export default function Component() {
       console.error("Error updating post:", error.response);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen justify-center items-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <Layout>
@@ -137,6 +157,8 @@ export default function Component() {
               className="w-full sm:max-w-sm"
               placeholder="Search blog posts..."
               type="search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
             <Button onClick={() => navigate("/create/post")} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" /> New Post
@@ -181,6 +203,29 @@ export default function Component() {
                 </CardFooter>
               </Card>
             ))}
+          </div>
+          <div className="flex justify-center items-center space-x-4 mt-8 mb-12">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span className="sr-only">Previous page</span>
+            </Button>
+            <div className="text-sm font-medium">
+              Page {currentPage} of {totalPages}
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+              <span className="sr-only">Next page</span>
+            </Button>
           </div>
         </main>
       </div>

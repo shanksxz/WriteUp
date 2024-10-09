@@ -76,10 +76,30 @@ export const deletePost = async (req, res) => {
   }
 };
 
+
 export const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find().populate("author", "username");
-    res.status(200).json({ posts });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skipIndex = (page - 1) * limit;
+
+    const totalPosts = await Post.countDocuments();
+    const totalPages = Math.ceil(totalPosts / limit);
+
+    const posts = await Post.find()
+      .populate("author", "username")
+      .sort({ createdAt: -1 })
+      .skip(skipIndex)
+      .limit(limit);
+
+    res.status(200).json({
+      posts,
+      currentPage: page,
+      totalPages,
+      totalPosts,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -87,11 +107,27 @@ export const getPosts = async (req, res) => {
 
 export const getUserPosts = async (req, res) => {
   try {
-    const posts = await Post.find({ author: req.user.id }).populate(
-      "author",
-      "username",
-    );
-    res.status(200).json({ posts });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skipIndex = (page - 1) * limit;
+
+    const totalPosts = await Post.countDocuments({ author: req.user.id });
+    const totalPages = Math.ceil(totalPosts / limit);
+
+    const posts = await Post.find({ author: req.user.id })
+      .populate("author", "username")
+      .sort({ createdAt: -1 })
+      .skip(skipIndex)
+      .limit(limit);
+
+    res.status(200).json({
+      posts,
+      currentPage: page,
+      totalPages,
+      totalPosts,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
