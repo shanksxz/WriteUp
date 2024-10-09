@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Controller } from "react-hook-form";
+import { useState, useEffect, useCallback } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
@@ -21,9 +21,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Pencil, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Pencil, Plus, Trash2, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import Tiptap from "@/components/TipTap";
-import { useForm } from "react-hook-form";
 import LoadingSpinner from "@/components/Loading";
 
 function stripHtmlAndTruncate(content, length = 100) {
@@ -33,7 +32,7 @@ function stripHtmlAndTruncate(content, length = 100) {
     : plainText;
 }
 
-export default function Component() {
+export default function BlogPostManager() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -45,14 +44,14 @@ export default function Component() {
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { control, handleSubmit, setValue } = useForm({
+  const { control, handleSubmit, setValue, reset } = useForm({
     defaultValues: {
       title: "",
       content: "",
     },
   });
 
-  const fetchPosts = async (page) => {
+  const fetchPosts = useCallback(async (page) => {
     try {
       setLoading(true);
       const res = await axios.get(
@@ -71,16 +70,21 @@ export default function Component() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm]);
 
   useEffect(() => {
     fetchPosts(1);
-  }, []);
+  }, [fetchPosts]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       fetchPosts(newPage);
     }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchPosts(1);
   };
 
   const openDeleteDialog = (postId) => {
@@ -133,6 +137,7 @@ export default function Component() {
       fetchPosts(currentPage);
       setIsEditDialogOpen(false);
       setPostToEdit(null);
+      reset();
     } catch (error) {
       toast.error("Error updating post");
       console.error("Error updating post:", error.response);
@@ -141,9 +146,11 @@ export default function Component() {
 
   if (loading) {
     return (
-      <div className="flex h-screen justify-center items-center">
-        <LoadingSpinner />
-      </div>
+      <Layout>
+        <div className="flex h-[calc(100vh-4rem)] justify-center items-center">
+          <LoadingSpinner />
+        </div>
+      </Layout>
     );
   }
 
@@ -153,80 +160,92 @@ export default function Component() {
         <header className="mb-4 md:mb-8">
           <h1 className="text-2xl md:text-3xl font-bold mb-4">My Blog Posts</h1>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <Input
-              className="w-full sm:max-w-sm"
-              placeholder="Search blog posts..."
-              type="search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <form onSubmit={handleSearch} className="w-full sm:max-w-sm flex">
+              <Input
+                className="rounded-r-none"
+                placeholder="Search blog posts..."
+                type="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Button type="submit" className="rounded-l-none">
+                <Search className="h-4 w-4" />
+                <span className="sr-only">Search</span>
+              </Button>
+            </form>
             <Button onClick={() => navigate("/create/post")} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" /> New Post
             </Button>
           </div>
         </header>
         <main>
-          <div className="grid gap-4 md:gap-6">
-            {posts.map((post) => (
-              <Card key={post._id}>
-                <CardHeader>
-                  <CardTitle className="text-xl md:text-2xl">{post.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs md:text-sm text-gray-500 mb-1 -mt-3">
-                    Published on {new Date(post.createdAt).toLocaleDateString()}
-                  </p>
-                  <p className="text-sm md:text-base text-gray-700">
-                    {stripHtmlAndTruncate(post.content)}
-                  </p>
-                </CardContent>
-                <CardFooter className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                  <div className="flex gap-2 w-full sm:w-auto">
-                    <Button
-                      variant="outline"
-                      onClick={() => openEditDialog(post)}
-                      className="flex-1 sm:flex-none"
-                    >
-                      <Pencil className="mr-2 h-4 w-4" /> Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => openDeleteDialog(post._id)}
-                      className="flex-1 sm:flex-none"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> Delete
-                    </Button>
-                  </div>
-                  <Link to={`/post/${post._id}`} className="w-full sm:w-auto">
-                    <Button variant="link" className="w-full sm:w-auto">Read More</Button>
-                  </Link>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-          <div className="flex justify-center items-center space-x-4 mt-8 mb-12">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">Previous page</span>
-            </Button>
-            <div className="text-sm font-medium">
-              Page {currentPage} of {totalPages}
+          {posts.length === 0 ? (
+            <p className="text-center text-gray-500 my-8">No posts found. Create a new post to get started!</p>
+          ) : (
+            <div className="grid gap-4 md:gap-6">
+              {posts.map((post) => (
+                <Card key={post._id}>
+                  <CardHeader>
+                    <CardTitle className="text-xl md:text-2xl">{post.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs md:text-sm text-gray-500 mb-1 -mt-3">
+                      Published on {new Date(post.createdAt).toLocaleDateString()}
+                    </p>
+                    <p className="text-sm md:text-base text-gray-700">
+                      {stripHtmlAndTruncate(post.content)}
+                    </p>
+                  </CardContent>
+                  <CardFooter className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div className="flex gap-2 w-full sm:w-auto">
+                      <Button
+                        variant="outline"
+                        onClick={() => openEditDialog(post)}
+                        className="flex-1 sm:flex-none"
+                      >
+                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => openDeleteDialog(post._id)}
+                        className="flex-1 sm:flex-none"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                      </Button>
+                    </div>
+                    <Link to={`/post/${post._id}`} className="w-full sm:w-auto">
+                      <Button variant="link" className="w-full sm:w-auto">Read More</Button>
+                    </Link>
+                  </CardFooter>
+                </Card>
+              ))}
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-              <span className="sr-only">Next page</span>
-            </Button>
-          </div>
+          )}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center space-x-4 mt-8 mb-12">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span className="sr-only">Previous page</span>
+              </Button>
+              <div className="text-sm font-medium">
+                Page {currentPage} of {totalPages}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+                <span className="sr-only">Next page</span>
+              </Button>
+            </div>
+          )}
         </main>
       </div>
 
@@ -305,7 +324,10 @@ export default function Component() {
             <DialogFooter>
               <Button
                 variant="outline"
-                onClick={() => setIsEditDialogOpen(false)}
+                onClick={() => {
+                  setIsEditDialogOpen(false);
+                  reset();
+                }}
                 className="mt-2 sm:mt-0"
               >
                 Cancel

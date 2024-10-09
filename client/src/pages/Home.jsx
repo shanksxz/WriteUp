@@ -21,7 +21,7 @@ export default function Home() {
     setLoading(true);
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/post`, {
-        params: { page, limit: 5 },
+        params: { page, limit: 7 }, 
         withCredentials: true,
       });
       setPosts(res.data.posts);
@@ -55,46 +55,52 @@ export default function Home() {
 
   return (
     <Layout>
-      {loading && (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      )}
-      {error && (
-        <div className="text-red-500 text-center my-4">{error}</div>
-      )}
-      {!loading && !error && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 md:px-6 mt-5 mb-3">
-            {posts.map((post) => (
-              <BlogCard key={post._id} post={post} />
-            ))}
-          </div>
-          <div className="flex justify-center items-center space-x-4 mt-8 mb-12">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">Previous page</span>
-            </Button>
-            <div className="text-sm font-medium">
-              Page {currentPage} of {totalPages}
+      <div className="flex flex-col min-h-screen">
+        <div className="flex-grow">
+          {loading && (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin" />
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-              <span className="sr-only">Next page</span>
-            </Button>
+          )}
+          {error && (
+            <div className="text-red-500 text-center my-4">{error}</div>
+          )}
+          {!loading && !error && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-7 px-4 md:px-6 mt-5 mb-3">
+              {posts.map((post) => (
+                <BlogCard key={post._id} post={post} />
+              ))}
+            </div>
+          )}
+        </div>
+        {!loading && !error && totalPages > 1 && (
+          <div className="sticky bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t py-4">
+            <div className="container flex justify-center items-center space-x-4">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span className="sr-only">Previous page</span>
+              </Button>
+              <div className="text-sm font-medium">
+                Page {currentPage} of {totalPages}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+                <span className="sr-only">Next page</span>
+              </Button>
+            </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
     </Layout>
   );
 }
