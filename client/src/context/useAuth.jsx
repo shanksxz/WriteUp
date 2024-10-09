@@ -1,3 +1,4 @@
+import LoadingSpinner from "@/components/Loading";
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 
@@ -32,7 +33,9 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{ user, loading, error, isAuthenticated: !!user, setUser }}>
       {loading ? (
-        <div>Loading...</div>
+        <div className="flex h-screen justify-center items-center">
+          <LoadingSpinner className={""} />
+        </div>
       ) : (
         children
       )}
