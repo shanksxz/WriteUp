@@ -21,7 +21,7 @@ export default function Home() {
     setLoading(true);
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/post`, {
-        params: { page, limit: 7 }, 
+        params: { page, limit: 6 }, 
         withCredentials: true,
       });
       setPosts(res.data.posts);

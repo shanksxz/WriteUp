@@ -57,7 +57,7 @@ export default function BlogPostManager() {
       const res = await axios.get(
         `${import.meta.env.VITE_API_URL}/user/posts`,
         {
-          params: { page, limit: 5, search: searchTerm },
+          params: { page, limit: 2, search: searchTerm },
           withCredentials: true,
         }
       );
